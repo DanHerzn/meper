@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>¿Me perdonas?</title>
     <style>
-        /* Fixes padding calculation issues */
         * {
             box-sizing: border-box;
         }
@@ -20,7 +19,7 @@
             font-family: 'Georgia', 'Times New Roman', serif;
             overflow: hidden;
             color: #4a4a4a;
-            /* Completely disables accidental double-tap zooming on mobile */
+            /* Prevents zoom on double tap */
             touch-action: manipulation; 
         }
 
@@ -35,14 +34,13 @@
             text-align: center;
             width: 90%;
             max-width: 350px;
-            min-height: 300px; /* Ensures plenty of room */
+            min-height: 300px; 
             position: relative; 
             z-index: 10;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
-            /* Prevents text from turning blue when tapped rapidly */
             user-select: none;
             -webkit-user-select: none;
         }
@@ -94,9 +92,8 @@
             border: 1px solid #ddd;
             position: relative;
             z-index: 50; 
-            /* Forces mobile browsers to render this on a separate hardware layer so it NEVER vanishes */
+            /* Hardware acceleration to prevent mobile flickering */
             transform: translateZ(0);
-            will-change: top, left;
         }
 
         #message {
@@ -131,37 +128,40 @@
         const message = document.getElementById('message');
         const card = document.getElementById('main-card');
 
-        function moveButton(e) {
-            // Prevent duplicate ghost clicks on mobile screens
-            if (e.type === 'touchstart') {
-                e.preventDefault();
-            }
-
-            // Lock it out of the normal layout flow so it can move freely
-            if (btnNo.style.position !== 'absolute') {
-                btnNo.style.position = 'absolute';
-            }
-
+        function moveButton() {
+            // Free the button from the layout so it can move anywhere inside the card
+            btnNo.style.position = 'absolute';
             btnNo.style.transition = 'left 0.3s ease-out, top 0.3s ease-out';
             
-            const margin = 20; // 20px padding from the very edge of the card
+            // Define the safe area inside the white card
+            const padding = 20; 
             
-            // Calculate absolute boundaries (using Math.max to prevent negative numbers on tiny screens)
-            const maxX = Math.max(0, card.clientWidth - btnNo.offsetWidth - margin);
-            const maxY = Math.max(0, card.clientHeight - btnNo.offsetHeight - margin);
+            // Calculate the maximum X and Y allowed (Math.max prevents negative numbers on very small screens)
+            const maxLeft = Math.max(padding, card.clientWidth - btnNo.offsetWidth - padding);
+            const maxTop = Math.max(padding, card.clientHeight - btnNo.offsetHeight - padding);
             
-            // Generate coordinates strictly between [margin] and [maxX/maxY]
-            const randomX = Math.floor(Math.random() * (maxX - margin + 1)) + margin;
-            const randomY = Math.floor(Math.random() * (maxY - margin + 1)) + margin;
+            // Generate a random position strictly within the safe boundaries
+            const randomX = Math.floor(Math.random() * (maxLeft - padding + 1)) + padding;
+            const randomY = Math.floor(Math.random() * (maxTop - padding + 1)) + padding;
             
             btnNo.style.left = randomX + 'px';
             btnNo.style.top = randomY + 'px';
         }
 
-        // Listens for both desktop clicks and mobile taps
-        btnNo.addEventListener('click', moveButton);
-        btnNo.addEventListener('touchstart', moveButton, { passive: false });
+        // DESKTOP: Run away when the mouse hovers over it
+        btnNo.addEventListener('mouseenter', function(e) {
+            // Only trigger hover if the device actually has a mouse cursor
+            if (window.matchMedia("(hover: hover)").matches) {
+                moveButton();
+            }
+        });
 
+        // MOBILE & DESKTOP: Run away if they actually manage to tap/click it
+        btnNo.addEventListener('click', function(e) {
+            moveButton();
+        });
+
+        // Success Action
         btnSi.addEventListener('click', () => {
             message.style.display = 'block';
         });
