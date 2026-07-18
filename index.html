@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>¿Me perdonas?</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #ffe6e6; /* Soft pastel pink background */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden; /* Prevents scrollbars when the button moves */
+        }
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 85%;
+            width: 350px;
+            position: relative;
+            z-index: 10;
+        }
+        h1 {
+            color: #ff4d4d;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        button {
+            padding: 12px 35px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s; /* Smooth visual click effect */
+        }
+        #btn-si {
+            background-color: #4CAF50;
+            color: white;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        #btn-si:active {
+            transform: scale(0.90);
+        }
+        #btn-no {
+            background-color: #ff4d4d;
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 77, 77, 0.3);
+            position: relative;
+            transition: left 0.3s ease, top 0.3s ease; /* Smooth floating movement */
+        }
+        #message {
+            display: none;
+            font-size: 1.8em;
+            color: #ff4d4d;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card" id="main-card">
+        <h1 id="question">¿Me perdonas?</h1>
+        <div class="buttons" id="btn-container">
+            <button id="btn-si">Sí</button>
+            <button id="btn-no">No</button>
+        </div>
+        <div id="message">Entonces contéstame porfis 🥺</div>
+    </div>
+
+    <script>
+        const btnNo = document.getElementById('btn-no');
+        const btnSi = document.getElementById('btn-si');
+        const message = document.getElementById('message');
+        const question = document.getElementById('question');
+        const btnContainer = document.getElementById('btn-container');
+
+        function moveButton(e) {
+            // Prevent the default touch action so they can't force-click it on mobile
+            if (e.type === 'touchstart') {
+                e.preventDefault();
+            }
+
+            // Change to fixed positioning so it breaks out of the card and moves around the screen
+            btnNo.style.position = 'fixed';
+            
+            // Calculate random positions within the visible window bounds
+            const maxX = window.innerWidth - btnNo.offsetWidth;
+            const maxY = window.innerHeight - btnNo.offsetHeight;
+            
+            // Generate random coordinates (keeping a small margin from the edges)
+            const randomX = Math.max(10, Math.floor(Math.random() * maxX));
+            const randomY = Math.max(10, Math.floor(Math.random() * maxY));
+            
+            btnNo.style.left = randomX + 'px';
+            btnNo.style.top = randomY + 'px';
+        }
+
+        // Trigger evasion on mouse hover (desktop) or touch attempt (mobile)
+        btnNo.addEventListener('mouseover', moveButton);
+        btnNo.addEventListener('touchstart', moveButton);
+
+        // Success action when "Sí" is clicked
+        btnSi.addEventListener('click', () => {
+            // Hide the question and buttons
+            question.style.display = 'none';
+            btnContainer.style.display = 'none';
+            btnNo.style.display = 'none'; // Ensure the No button disappears completely
+            
+            // Show the success message
+            message.style.display = 'block';
+        });
+    </script>
+</body>
+</html>
