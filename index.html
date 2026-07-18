@@ -5,66 +5,91 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>¿Me perdonas?</title>
     <style>
+        /* Soft, warm gradient background */
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #ffe6e6; /* Soft pastel pink background */
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden; /* Prevents scrollbars when the button moves */
+            background: linear-gradient(135deg, #fdfbfb 0%, #f4eae6 100%);
+            font-family: 'Georgia', 'Times New Roman', serif; /* Elegant, letter-like font */
+            overflow: hidden;
+            color: #4a4a4a;
         }
+
+        /* Glassmorphism card effect */
         .card {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 50px 40px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04);
             text-align: center;
             max-width: 85%;
-            width: 350px;
+            width: 320px;
             position: relative;
             z-index: 10;
         }
+
         h1 {
-            color: #ff4d4d;
-            margin-bottom: 30px;
+            font-weight: 400;
+            margin-bottom: 35px;
             font-size: 2.2em;
+            letter-spacing: 0.5px;
+            color: #5a4a4a;
         }
+
         .buttons {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
         }
+
         button {
             padding: 12px 35px;
-            font-size: 1.2em;
-            border: none;
-            border-radius: 50px;
+            font-size: 1.1em;
+            font-family: inherit;
+            border-radius: 30px;
             cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.2s; /* Smooth visual click effect */
+            transition: all 0.3s ease;
         }
+
+        /* Gentle rose color for the 'Yes' button */
         #btn-si {
-            background-color: #4CAF50;
+            background-color: #d4a3a3;
             color: white;
-            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+            border: none;
+            box-shadow: 0 4px 15px rgba(212, 163, 163, 0.4);
         }
+
         #btn-si:active {
-            transform: scale(0.90);
+            transform: scale(0.95);
+            box-shadow: 0 2px 10px rgba(212, 163, 163, 0.3);
         }
+
+        /* Understated, subtle 'No' button */
         #btn-no {
-            background-color: #ff4d4d;
-            color: white;
-            box-shadow: 0 4px 15px rgba(255, 77, 77, 0.3);
+            background-color: transparent;
+            color: #999;
+            border: 1px solid #ddd;
             position: relative;
-            transition: left 0.3s ease, top 0.3s ease; /* Smooth floating movement */
         }
+
+        /* The final message style */
         #message {
             display: none;
-            font-size: 1.8em;
-            color: #ff4d4d;
-            font-weight: bold;
+            font-size: 1.6em;
+            color: #6b5b5b;
+            font-style: italic;
+            animation: fadeIn 1.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -76,7 +101,7 @@
             <button id="btn-si">Sí</button>
             <button id="btn-no">No</button>
         </div>
-        <div id="message">Entonces contéstame porfis 🥺</div>
+        <div id="message">Entonces contéstame porfis...</div>
     </div>
 
     <script>
@@ -87,38 +112,32 @@
         const btnContainer = document.getElementById('btn-container');
 
         function moveButton(e) {
-            // Prevent the default touch action so they can't force-click it on mobile
             if (e.type === 'touchstart') {
                 e.preventDefault();
             }
 
-            // Change to fixed positioning so it breaks out of the card and moves around the screen
+            // Smoothly pop out of the normal layout
             btnNo.style.position = 'fixed';
+            btnNo.style.transition = 'left 0.4s ease-out, top 0.4s ease-out';
             
-            // Calculate random positions within the visible window bounds
             const maxX = window.innerWidth - btnNo.offsetWidth;
             const maxY = window.innerHeight - btnNo.offsetHeight;
             
-            // Generate random coordinates (keeping a small margin from the edges)
-            const randomX = Math.max(10, Math.floor(Math.random() * maxX));
-            const randomY = Math.max(10, Math.floor(Math.random() * maxY));
+            const randomX = Math.max(20, Math.floor(Math.random() * (maxX - 20)));
+            const randomY = Math.max(20, Math.floor(Math.random() * (maxY - 20)));
             
             btnNo.style.left = randomX + 'px';
             btnNo.style.top = randomY + 'px';
         }
 
-        // Trigger evasion on mouse hover (desktop) or touch attempt (mobile)
         btnNo.addEventListener('mouseover', moveButton);
         btnNo.addEventListener('touchstart', moveButton);
 
-        // Success action when "Sí" is clicked
         btnSi.addEventListener('click', () => {
-            // Hide the question and buttons
             question.style.display = 'none';
             btnContainer.style.display = 'none';
-            btnNo.style.display = 'none'; // Ensure the No button disappears completely
+            btnNo.style.display = 'none';
             
-            // Show the success message
             message.style.display = 'block';
         });
     </script>
