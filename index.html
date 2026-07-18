@@ -19,7 +19,6 @@
             font-family: 'Georgia', 'Times New Roman', serif;
             overflow: hidden;
             color: #4a4a4a;
-            /* Prevents zoom on double tap */
             touch-action: manipulation; 
         }
 
@@ -92,7 +91,6 @@
             border: 1px solid #ddd;
             position: relative;
             z-index: 50; 
-            /* Hardware acceleration to prevent mobile flickering */
             transform: translateZ(0);
         }
 
@@ -129,39 +127,71 @@
         const card = document.getElementById('main-card');
 
         function moveButton() {
-            // Free the button from the layout so it can move anywhere inside the card
-            btnNo.style.position = 'absolute';
+            // Unpin the button so it can move
+            if (btnNo.style.position !== 'absolute') {
+                btnNo.style.position = 'absolute';
+            }
+
             btnNo.style.transition = 'left 0.3s ease-out, top 0.3s ease-out';
             
-            // Define the safe area inside the white card
             const padding = 20; 
             
-            // Calculate the maximum X and Y allowed (Math.max prevents negative numbers on very small screens)
             const maxLeft = Math.max(padding, card.clientWidth - btnNo.offsetWidth - padding);
             const maxTop = Math.max(padding, card.clientHeight - btnNo.offsetHeight - padding);
             
-            // Generate a random position strictly within the safe boundaries
-            const randomX = Math.floor(Math.random() * (maxLeft - padding + 1)) + padding;
-            const randomY = Math.floor(Math.random() * (maxTop - padding + 1)) + padding;
+            // Get the exact location of the card and the "Sí" button
+            const cardRect = card.getBoundingClientRect();
+            const siRect = btnSi.getBoundingClientRect();
             
+            // Calculate the forbidden zone (the "Sí" button plus a 15px invisible forcefield)
+            const buffer = 15;
+            const siLeft = siRect.left - cardRect.left - buffer;
+            const siRight = siRect.right - cardRect.left + buffer;
+            const siTop = siRect.top - cardRect.top - buffer;
+            const siBottom = siRect.bottom - cardRect.top + buffer;
+
+            let randomX, randomY;
+            let isOverlapping = true;
+            let attempts = 0;
+
+            // Keep generating new coordinates until we find a spot that DOESN'T overlap with the "Sí" button
+            while (isOverlapping && attempts < 50) {
+                randomX = Math.floor(Math.random() * (maxLeft - padding + 1)) + padding;
+                randomY = Math.floor(Math.random() * (maxTop - padding + 1)) + padding;
+                
+                // Define the corners of where the "No" button WOULD go
+                const noRight = randomX + btnNo.offsetWidth;
+                const noBottom = randomY + btnNo.offsetHeight;
+
+                // Check for a collision
+                if (randomX < siRight && noRight > siLeft && randomY < siBottom && noBottom > siTop) {
+                    // Collision detected! The while loop will run again to pick a new spot
+                    isOverlapping = true;
+                } else {
+                    // Safe spot found! Break the loop
+                    isOverlapping = false;
+                }
+                attempts++;
+            }
+            
+            // Move the button to the safe spot
             btnNo.style.left = randomX + 'px';
             btnNo.style.top = randomY + 'px';
         }
 
-        // DESKTOP: Run away when the mouse hovers over it
+        // DESKTOP: Dodges on hover
         btnNo.addEventListener('mouseenter', function(e) {
-            // Only trigger hover if the device actually has a mouse cursor
             if (window.matchMedia("(hover: hover)").matches) {
                 moveButton();
             }
         });
 
-        // MOBILE & DESKTOP: Run away if they actually manage to tap/click it
+        // MOBILE & DESKTOP: Dodges on click/tap
         btnNo.addEventListener('click', function(e) {
             moveButton();
         });
 
-        // Success Action
+        // SUCCESS: Show the message
         btnSi.addEventListener('click', () => {
             message.style.display = 'block';
         });
