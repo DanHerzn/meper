@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>¿Me perdonas?</title>
     <style>
+        /* Fixes padding calculation issues */
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             display: flex;
             justify-content: center;
@@ -15,6 +20,8 @@
             font-family: 'Georgia', 'Times New Roman', serif;
             overflow: hidden;
             color: #4a4a4a;
+            /* Completely disables accidental double-tap zooming on mobile */
+            touch-action: manipulation; 
         }
 
         .card {
@@ -26,15 +33,18 @@
             border: 1px solid rgba(255, 255, 255, 0.5);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04);
             text-align: center;
-            max-width: 85%;
-            width: 320px;
-            min-height: 280px; /* Gives the button plenty of room to run around */
-            position: relative; /* Traps the No button inside this container */
+            width: 90%;
+            max-width: 350px;
+            min-height: 300px; /* Ensures plenty of room */
+            position: relative; 
             z-index: 10;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
+            /* Prevents text from turning blue when tapped rapidly */
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         h1 {
@@ -52,7 +62,7 @@
             align-items: center;
             gap: 15px;
             width: 100%;
-            min-height: 50px; /* Keeps the "Sí" button perfectly centered when "No" runs away */
+            min-height: 50px; 
         }
 
         button {
@@ -62,6 +72,7 @@
             border-radius: 30px;
             cursor: pointer;
             transition: all 0.3s ease;
+            touch-action: manipulation; 
         }
 
         #btn-si {
@@ -82,7 +93,10 @@
             color: #999;
             border: 1px solid #ddd;
             position: relative;
-            z-index: 50; /* Ensures it floats above the text inside the card */
+            z-index: 50; 
+            /* Forces mobile browsers to render this on a separate hardware layer so it NEVER vanishes */
+            transform: translateZ(0);
+            will-change: top, left;
         }
 
         #message {
@@ -108,8 +122,7 @@
             <button id="btn-si">Sí</button>
             <button id="btn-no">No</button>
         </div>
-        <!-- This stays hidden until they click Sí -->
-        <div id="message">Entonces contéstame porfis...</div>
+        <div id="message">Entonces contéstame porfis... 🥺</div>
     </div>
 
     <script>
@@ -119,34 +132,36 @@
         const card = document.getElementById('main-card');
 
         function moveButton(e) {
+            // Prevent duplicate ghost clicks on mobile screens
             if (e.type === 'touchstart') {
                 e.preventDefault();
             }
 
-            // Change position to absolute relative to the white card, not the whole screen
-            btnNo.style.position = 'absolute';
+            // Lock it out of the normal layout flow so it can move freely
+            if (btnNo.style.position !== 'absolute') {
+                btnNo.style.position = 'absolute';
+            }
+
             btnNo.style.transition = 'left 0.3s ease-out, top 0.3s ease-out';
             
-            // Calculate the boundaries of the white card
-            // We use a small margin (15px) so the button doesn't spill over the rounded edges
-            const margin = 15;
-            const maxX = card.clientWidth - btnNo.offsetWidth - margin;
-            const maxY = card.clientHeight - btnNo.offsetHeight - margin;
+            const margin = 20; // 20px padding from the very edge of the card
             
-            // Generate a random position strictly INSIDE the white card
-            const randomX = Math.max(margin, Math.floor(Math.random() * maxX));
-            const randomY = Math.max(margin, Math.floor(Math.random() * maxY));
+            // Calculate absolute boundaries (using Math.max to prevent negative numbers on tiny screens)
+            const maxX = Math.max(0, card.clientWidth - btnNo.offsetWidth - margin);
+            const maxY = Math.max(0, card.clientHeight - btnNo.offsetHeight - margin);
             
-            // Apply the new position
+            // Generate coordinates strictly between [margin] and [maxX/maxY]
+            const randomX = Math.floor(Math.random() * (maxX - margin + 1)) + margin;
+            const randomY = Math.floor(Math.random() * (maxY - margin + 1)) + margin;
+            
             btnNo.style.left = randomX + 'px';
             btnNo.style.top = randomY + 'px';
         }
 
-        // Make it dodge on both hover (desktop) and tap (mobile)
-        btnNo.addEventListener('mouseover', moveButton);
-        btnNo.addEventListener('touchstart', moveButton);
+        // Listens for both desktop clicks and mobile taps
+        btnNo.addEventListener('click', moveButton);
+        btnNo.addEventListener('touchstart', moveButton, { passive: false });
 
-        // When "Sí" is clicked, show the message
         btnSi.addEventListener('click', () => {
             message.style.display = 'block';
         });
